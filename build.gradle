@@ -1,0 +1,17 @@
+plugins {
+    id 'org.akhikhl.gretty' version '2.0.0'
+    id 'com.devsoap.vaadin-flow' version '1.0.0.M5'
+}
+
+vaadin {
+    // Vaadin version to use
+    version '11.0.0'
+
+    // Enable production mode for production apps
+    productionMode false
+	submitStatistics true
+}
+
+// Automatically configure repositories and dependencies. For a more fine-grained example see
+// https://github.com/devsoap/gradle-vaadin-flow/wiki/Dependency-management
+vaadin.autoconfigure()
