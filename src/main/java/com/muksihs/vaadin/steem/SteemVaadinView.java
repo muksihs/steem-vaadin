@@ -53,6 +53,12 @@ public class SteemVaadinView extends VerticalLayout {
 						itemText.setWidth("98%");
 						SteemVaadinView.this.add(itemText);
 					}
+				} else {
+					TextArea itemText = new TextArea("OTHER ITEM");
+					String jsonEntry = value.toJson();
+					itemText.setValue(value.getType() + ":\n\n" + jsonEntry);
+					itemText.setWidth("98%");
+					SteemVaadinView.this.add(itemText);
 				}
 			}
 		}, query);
