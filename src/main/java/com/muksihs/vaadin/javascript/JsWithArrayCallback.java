@@ -11,8 +11,9 @@ import com.vaadin.flow.component.UI;
 import elemental.json.JsonValue;
 
 @SuppressWarnings("serial")
-@Tag("JavascriptWithCallback")
+@Tag("script")
 public class JsWithArrayCallback extends Component {
+	
 	private static long counter = System.currentTimeMillis();
 
 	private static synchronized long nextCounter() {
@@ -29,17 +30,25 @@ public class JsWithArrayCallback extends Component {
 		this.setId(id);
 	}
 
-	public static void call(HasComponents context, String function, JsonValue... args) {
-		call(context, function, null, args);
-	}
-	public static void call(HasComponents context, String function, JsArrayCallback onCallback, JsonValue... args) {
-		JsWithArrayCallback e = new JsWithArrayCallback(onCallback);
-		context.add(e);
-		e.call(function, args);
-		System.out.println("Javascript-Callback: "+e.getJavascriptFunctionCall());
+	public static void call(String function, JsonValue... args) {
+		call(function, null, args);
 	}
 
-	protected void call(String function, JsonValue... args) {
+	public static void call(String function, JsArrayCallback onCallback, JsonValue... args) {
+		UI.getCurrent().getSession().access(()->{
+			HasComponents ctx = UI.getCurrent();
+			JsWithArrayCallback e = new JsWithArrayCallback(onCallback);
+			e.addAttachListener((event) -> {
+				UI.getCurrent().access(() -> {
+					e._call(function, args);
+					System.out.println("Javascript-Then: " + e.getJavascriptFunctionCall());
+				});
+			});
+			ctx.add(e);
+		});
+	}
+
+	protected void _call(String function, JsonValue... args) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(function);
 		sb.append("(");
@@ -71,7 +80,7 @@ public class JsWithArrayCallback extends Component {
 		if (onCallback != null) {
 			onCallback.result(jsonValues);
 		}
-		getElement().removeFromParent();
+		// getElement().removeFromParent();
 	}
 
 	public String getJavascriptFunctionCall() {

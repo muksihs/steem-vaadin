@@ -11,7 +11,7 @@ import com.vaadin.flow.component.UI;
 import elemental.json.JsonValue;
 
 @SuppressWarnings("serial")
-@Tag("JavascriptWithThen")
+@Tag("script")
 public class JsExecuteThen extends Component {
 	private static long counter = System.currentTimeMillis();
 
@@ -35,23 +35,30 @@ public class JsExecuteThen extends Component {
 		this(onThen, null);
 	}
 
-	public static void call(HasComponents context, String function, JsonValue... args) {
-		call(context, function, null, null, args);
-	}
-	
-	public static void call(HasComponents context, String function, JsCallback then, JsonValue... args) {
-		call(context, function, then, null, args);
+	public static void call(String function, JsonValue... args) {
+		call(function, null, null, args);
 	}
 
-	public static void call(HasComponents context, String function, JsCallback then, JsCallback onCatch,
+	public static void call(String function, JsCallback then, JsonValue... args) {
+		call(function, then, null, args);
+	}
+
+	public static void call(String function, JsCallback then, JsCallback onCatch,
 			JsonValue... args) {
-		JsExecuteThen e = new JsExecuteThen(then, onCatch);
-		context.add(e);
-		e.call(function, args);
-		System.out.println("Javascript-Then: "+e.getJavascriptFunctionCall());
+		UI.getCurrent().getSession().access(()->{
+			HasComponents ctx = UI.getCurrent();
+			JsExecuteThen e = new JsExecuteThen(then, onCatch);
+			e.addAttachListener((event) -> {
+				UI.getCurrent().access(() -> {
+					e._call(function, args);
+					System.out.println("Javascript-Then: " + e.getJavascriptFunctionCall());
+				});
+			});
+			ctx.add(e);
+		});
 	}
 
-	protected void call(String function, JsonValue... args) {
+	protected void _call(String function, JsonValue... args) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(function);
 		sb.append("(");
@@ -96,7 +103,7 @@ public class JsExecuteThen extends Component {
 		if (onCatch != null) {
 			onCatch.result(result);
 		}
-		getElement().removeFromParent();
+//		getElement().removeFromParent();
 	}
 
 	public String getJavascriptFunctionCall() {

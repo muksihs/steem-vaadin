@@ -10,4 +10,5 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @HtmlImport("frontend://styles/steemvaadin-theme.html")
 @Theme(value=Lumo.class, variant="dark")
 @JavaScript("//cdn.steemjs.com/lib/latest/steem.min.js")
-public class SteemVaadinUI extends UI {}
+public class SteemVaadinUI extends UI {
+}

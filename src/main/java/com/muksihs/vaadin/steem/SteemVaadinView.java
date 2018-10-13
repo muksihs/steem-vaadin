@@ -4,6 +4,8 @@ import com.muksihs.vaadin.javascript.JsBiErrorResultCallback;
 import com.muksihs.vaadin.javascript.JsCallback;
 import com.muksihs.vaadin.javascript.JsExecuteThen;
 import com.muksihs.vaadin.javascript.JsWithArrayCallback;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.BodySize;
@@ -31,11 +33,24 @@ public class SteemVaadinView extends VerticalLayout {
 
 	public SteemVaadinView() {
 		setClassName("app-view");
+		
 		JsonObject query = Json.createObject();
 		query.put("tag", "leatherdog-games");
 		query.put("limit", 2);
 
-		JsWithArrayCallback.call(this, GET_DISCUSSIONS_BY_BLOG, (JsBiErrorResultCallback) value -> {
+		UI.getCurrent().getSession().access(()->{
+				System.out.println("command via session");
+				HasComponents context = UI.getCurrent();
+				context.add(new Label("ADD TO UI VIA SESSION EXECUTE"));
+		});
+		
+		
+		HasComponents context = UI.getCurrent();
+		
+		context.add(new Label("ADD TO CONTEXT"));
+		context.getElement().getNode().markAsDirty();
+
+		JsWithArrayCallback.call(GET_DISCUSSIONS_BY_BLOG, (JsBiErrorResultCallback) value -> {
 			Label label = new Label("With Callback");
 			SteemVaadinView.this.add(label);
 			int ix = 0;
@@ -63,7 +78,7 @@ public class SteemVaadinView extends VerticalLayout {
 			}
 		}, query);
 
-		JsExecuteThen.call(this, GET_DISCUSSIONS_BY_BLOG_ASYNC, value -> {
+		JsExecuteThen.call(GET_DISCUSSIONS_BY_BLOG_ASYNC, value -> {
 			Label label = new Label("With Then");
 			SteemVaadinView.this.add(label);
 			int ix = 0;
@@ -91,12 +106,14 @@ public class SteemVaadinView extends VerticalLayout {
 			}
 		}, query);
 
-		JsExecuteThen.call(this, GET_DISCUSSIONS_BY_BLOG_ASYNC, null, (JsCallback) error -> {
+		JsExecuteThen.call(GET_DISCUSSIONS_BY_BLOG_ASYNC, null, (JsCallback) error -> {
 			TextArea itemText = new TextArea("ERROR");
 			String jsonEntry = error.toJson();
 			itemText.setValue(error.getType() + ":\n\n" + jsonEntry);
 			itemText.setWidth("98%");
 			SteemVaadinView.this.add(itemText);
 		}, Json.createNull());
+		
+		System.out.println(UI.getCurrent().getElement().getOuterHTML());
 	}
 }
