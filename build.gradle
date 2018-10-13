@@ -12,6 +12,15 @@ vaadin {
 	submitStatistics true
 }
 
+repositories {
+	jcenter()
+	vaadin.repositories()
+}
+
 // Automatically configure repositories and dependencies. For a more fine-grained example see
 // https://github.com/devsoap/gradle-vaadin-flow/wiki/Dependency-management
 vaadin.autoconfigure()
+
+dependencies {
+	compile "com.flowingcode.addons.applayout:app-layout-addon:1.0.4"
+}
