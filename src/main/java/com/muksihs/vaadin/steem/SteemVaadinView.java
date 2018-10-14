@@ -4,8 +4,9 @@ import com.muksihs.vaadin.javascript.JsBiErrorResultCallback;
 import com.muksihs.vaadin.javascript.JsCallback;
 import com.muksihs.vaadin.javascript.JsExecuteThen;
 import com.muksihs.vaadin.javascript.JsWithArrayCallback;
-import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.BodySize;
@@ -32,23 +33,31 @@ public class SteemVaadinView extends VerticalLayout {
 	private static final String GET_DISCUSSIONS_BY_BLOG_ASYNC = "steem.api.getDiscussionsByBlogAsync";
 
 	public SteemVaadinView() {
+		UI ui1 = UI.getCurrent();
+		ui1.add(new Label("Add Component while in Constructor"));
+		System.out.println("UI1 hashCode: "+ui1.hashCode());
+		System.out.println("HTML: "+ui1.getElement().getOuterHTML());
+		ui1.access(()->{
+			UI ui2 = UI.getCurrent();
+			System.out.println("UI2 hashCode: "+ui2.hashCode());
+			System.out.println("HTML: "+ui2.getElement().getOuterHTML());
+		});
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+
+		UI.getCurrent().add(new Label("SteemVaadinView#onAttach"));
+
 		setClassName("app-view");
-		
+
+		Button button = new Button("NAV1");
+		button.addClickListener((e) -> UI.getCurrent().navigate(TopNavTest.class));
+		this.add(button);
+
 		JsonObject query = Json.createObject();
 		query.put("tag", "leatherdog-games");
 		query.put("limit", 2);
-
-		UI.getCurrent().getSession().access(()->{
-				System.out.println("command via session");
-				HasComponents context = UI.getCurrent();
-				context.add(new Label("ADD TO UI VIA SESSION EXECUTE"));
-		});
-		
-		
-		HasComponents context = UI.getCurrent();
-		
-		context.add(new Label("ADD TO CONTEXT"));
-		context.getElement().getNode().markAsDirty();
 
 		JsWithArrayCallback.call(GET_DISCUSSIONS_BY_BLOG, (JsBiErrorResultCallback) value -> {
 			Label label = new Label("With Callback");
@@ -113,7 +122,5 @@ public class SteemVaadinView extends VerticalLayout {
 			itemText.setWidth("98%");
 			SteemVaadinView.this.add(itemText);
 		}, Json.createNull());
-		
-		System.out.println(UI.getCurrent().getElement().getOuterHTML());
 	}
 }
