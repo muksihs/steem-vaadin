@@ -13,7 +13,7 @@ import elemental.json.JsonValue;
 @SuppressWarnings("serial")
 @Tag("script")
 public class JsWithArrayCallback extends Component {
-	
+
 	private static long counter = System.currentTimeMillis();
 
 	private static synchronized long nextCounter() {
@@ -35,7 +35,7 @@ public class JsWithArrayCallback extends Component {
 	}
 
 	public static void call(String function, JsArrayCallback onCallback, JsonValue... args) {
-		UI.getCurrent().getSession().access(()->{
+		UI.getCurrent().getSession().access(() -> {
 			HasComponents ctx = UI.getCurrent();
 			JsWithArrayCallback e = new JsWithArrayCallback(onCallback);
 			e.addAttachListener((event) -> {
@@ -80,7 +80,10 @@ public class JsWithArrayCallback extends Component {
 		if (onCallback != null) {
 			onCallback.result(jsonValues);
 		}
-		// getElement().removeFromParent();
+		UI.getCurrent().getSession().access(() -> {
+			HasComponents ctx = UI.getCurrent();
+			ctx.remove(this);
+		});
 	}
 
 	public String getJavascriptFunctionCall() {

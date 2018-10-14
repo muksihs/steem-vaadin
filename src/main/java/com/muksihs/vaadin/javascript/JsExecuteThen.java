@@ -43,9 +43,8 @@ public class JsExecuteThen extends Component {
 		call(function, then, null, args);
 	}
 
-	public static void call(String function, JsCallback then, JsCallback onCatch,
-			JsonValue... args) {
-		UI.getCurrent().getSession().access(()->{
+	public static void call(String function, JsCallback then, JsCallback onCatch, JsonValue... args) {
+		UI.getCurrent().getSession().access(() -> {
 			HasComponents ctx = UI.getCurrent();
 			JsExecuteThen e = new JsExecuteThen(then, onCatch);
 			e.addAttachListener((event) -> {
@@ -95,7 +94,10 @@ public class JsExecuteThen extends Component {
 		if (onThen != null) {
 			onThen.result(result);
 		}
-		getElement().removeFromParent();
+		UI.getCurrent().getSession().access(() -> {
+			HasComponents ctx = UI.getCurrent();
+			ctx.remove(this);
+		});
 	}
 
 	@ClientCallable
@@ -103,7 +105,7 @@ public class JsExecuteThen extends Component {
 		if (onCatch != null) {
 			onCatch.result(result);
 		}
-//		getElement().removeFromParent();
+		// getElement().removeFromParent();
 	}
 
 	public String getJavascriptFunctionCall() {

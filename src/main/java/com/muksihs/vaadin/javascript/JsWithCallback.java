@@ -29,17 +29,25 @@ public class JsWithCallback extends Component {
 		this.setId(id);
 	}
 
-	public static void call(HasComponents context, String function, JsonValue... args) {
-		call(context, function, null, args);
-	}
-	public static void call(HasComponents context, String function, JsCallback onCallback, JsonValue... args) {
-		JsWithCallback e = new JsWithCallback(onCallback);
-		context.add(e);
-		e.call(function, args);
-		System.out.println("Javascript-Callback: "+e.getJavascriptFunctionCall());
+	public static void call(String function, JsonValue... args) {
+		call(function, null, args);
 	}
 
-	protected void call(String function, JsonValue... args) {
+	public static void call(String function, JsCallback onCallback, JsonValue... args) {
+		UI.getCurrent().getSession().access(() -> {
+			HasComponents ctx = UI.getCurrent();
+			JsWithCallback e = new JsWithCallback(onCallback);
+			e.addAttachListener((event) -> {
+				UI.getCurrent().access(() -> {
+					e._call(function, args);
+					System.out.println("Javascript-Callback: " + e.getJavascriptFunctionCall());
+				});
+			});
+			ctx.add(e);
+		});
+	}
+
+	protected void _call(String function, JsonValue... args) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(function);
 		sb.append("(");
@@ -71,7 +79,10 @@ public class JsWithCallback extends Component {
 		if (onCallback != null) {
 			onCallback.result(jsonValues);
 		}
-		getElement().removeFromParent();
+		UI.getCurrent().getSession().access(() -> {
+			HasComponents ctx = UI.getCurrent();
+			ctx.remove(this);
+		});
 	}
 
 	public String getJavascriptFunctionCall() {
